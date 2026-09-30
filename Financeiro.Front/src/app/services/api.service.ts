@@ -23,7 +23,7 @@ export class ApiService {
     return this.http.post<Lancamento>(`${this.base}/Lancamentos`, payload);
   }
 
-  updateLancamento(id: number, payload: Partial<Lancamento>): Observable<Lancamento> {
+  updateLancamento(id: number, payload: CriarLancamentoPayload): Observable<Lancamento> {
     return this.http.put<Lancamento>(`${this.base}/Lancamentos/${id}`, payload);
   }
 

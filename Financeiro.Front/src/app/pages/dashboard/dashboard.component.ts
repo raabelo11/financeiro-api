@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import { ApiService } from '../../services/api.service';
-import { Lancamento, LancamentoPorPeriodoReturn } from '../../models/lancamento.model';
+import { LancamentoPorPeriodoReturn } from '../../models/lancamento.model';
 
 interface MesOption {
   value: number;

@@ -47,3 +47,63 @@
 .input.invalid:focus {
   box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
 }
+
+.tipo-categoria-section {
+  width: 100%;
+}
+
+.tipo-options {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 8px;
+}
+
+.tipo-option {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 12px 8px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  color: var(--text-secondary);
+  font-family: inherit;
+  font-size: 0.875rem;
+  transition: all var(--transition-fast);
+
+  .material-icons-outlined {
+    font-size: 1.5rem;
+    transition: transform var(--transition-fast);
+  }
+}
+
+.tipo-option:hover {
+  border-color: var(--primary);
+  background: rgba(79, 70, 229, 0.04);
+
+  .material-icons-outlined {
+    transform: scale(1.1);
+  }
+}
+
+.tipo-option:focus-visible {
+  outline: none;
+  box-shadow: var(--ring);
+}
+
+.tipo-option.active {
+  background: rgba(79, 70, 229, 0.12);
+  border-color: var(--primary);
+  font-weight: 600;
+
+  .material-icons-outlined {
+    transform: scale(1.15);
+  }
+}
+
+.novo-tipo-btn {
+  margin-top: 8px;
+}

@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, Validators } from '@angular/forms';
 import { ApiService } from '../../services/api.service';
-import { CriarLancamentoPayload } from '../../models/lancamento.model';
+import { Lancamento, CriarLancamentoPayload } from '../../models/lancamento.model';
 import { Categoria, CategoriaPayload } from '../../models/categoria.model';
 import { ActivatedRoute, Router } from '@angular/router';
 
@@ -13,8 +13,8 @@ import { ActivatedRoute, Router } from '@angular/router';
 })
 export class LancamentoFormComponent implements OnInit {
   form = this.fb.group({
-    nomeLancamento: ['', Validators.required],
-    valorLancamento: [0, [Validators.required]],
+    nomeLancamento: [''],
+    valorLancamento: [0, [Validators.required, Validators.min(0.01)]],
     selecao: ['', Validators.required]
   });
 
@@ -24,8 +24,9 @@ export class LancamentoFormComponent implements OnInit {
   lancamentoId: number | null = null;
   loading = false;
   saving = false;
+  erroSalvar: string | null = null;
   titulo = 'Novo Lancamento';
-  lancamentosAdicionados: CriarLancamentoPayload[] = [];
+  lancamentosAdicionados: Lancamento[] = [];
 
   mostrarNovoTipo = false;
   novoTipoForm = this.fb.group({
@@ -49,6 +50,10 @@ export class LancamentoFormComponent implements OnInit {
       error: () => { this.categorias = []; }
     });
 
+    this.form.get('selecao')!.valueChanges.subscribe((selecao) => {
+      this.aplicarValidacaoNome(selecao);
+    });
+
     const idParam = this.route.snapshot.paramMap.get('id');
     if (idParam) {
       this.editMode = true;
@@ -56,6 +61,38 @@ export class LancamentoFormComponent implements OnInit {
       this.titulo = 'Editar Lancamento';
       this.loadLancamento(this.lancamentoId);
     }
+  }
+
+  get isReceitaSelecionada(): boolean {
+    return this.form.get('selecao')?.value === 'RECEITA';
+  }
+
+  get placeholderNomeLancamento(): string {
+    return this.isReceitaSelecionada
+      ? 'Ex.: Salario, Rendimentos...'
+      : 'Ex.: Mercado (opcional — usa o nome da categoria se vazio)';
+  }
+
+  private aplicarValidacaoNome(selecao: string | null): void {
+    const nomeControl = this.form.get('nomeLancamento')!;
+    if (selecao === 'RECEITA') {
+      nomeControl.setValidators([Validators.required]);
+    } else {
+      nomeControl.clearValidators();
+    }
+    nomeControl.updateValueAndValidity();
+  }
+
+  selecionar(valor: string): void {
+    this.form.patchValue({ selecao: valor });
+  }
+
+  isSelecionado(valor: string): boolean {
+    return this.form.get('selecao')?.value === valor;
+  }
+
+  idCategoria(categoria: Categoria): string {
+    return String(categoria.id);
   }
 
   loadLancamento(id: number) {
@@ -72,6 +109,7 @@ export class LancamentoFormComponent implements OnInit {
             valorLancamento: lancamento.valorLancamento,
             selecao
           });
+          this.aplicarValidacaoNome(selecao);
         }
         this.loading = false;
       },
@@ -81,32 +119,39 @@ export class LancamentoFormComponent implements OnInit {
 
   submit() {
     if (this.form.invalid) return;
+    this.erroSalvar = null;
     this.saving = true;
 
     const { nomeLancamento, valorLancamento, selecao } = this.form.value;
 
-    const payload: CriarLancamentoPayload = selecao === 'RECEITA'
-      ? { nomeLancamento: nomeLancamento!, valorLancamento: valorLancamento!, tipoLancamento: 'Receita', categoriaId: null }
-      : { nomeLancamento: nomeLancamento!, valorLancamento: valorLancamento!, tipoLancamento: 'Despesa', categoriaId: Number(selecao) };
+    let payload: CriarLancamentoPayload;
+    if (selecao === 'RECEITA') {
+      const nome = (nomeLancamento ?? '').trim();
+      payload = { nomeLancamento: nome, valorLancamento: valorLancamento!, tipoLancamento: 'Receita', categoriaId: null };
+    } else {
+      const nome = (nomeLancamento ?? '').trim();
+      payload = { nomeLancamento: nome.length > 0 ? nome : null, valorLancamento: valorLancamento!, tipoLancamento: 'Despesa', categoriaId: Number(selecao) };
+    }
 
     if (this.editMode && this.lancamentoId) {
       this.api.updateLancamento(this.lancamentoId, payload).subscribe({
         next: () => { this.saving = false; this.router.navigate(['/lancamentos']); },
-        error: () => { this.saving = false; }
+        error: (err) => { this.saving = false; this.erroSalvar = err.error?.message ?? 'Erro ao salvar lançamento.'; }
       });
       return;
     }
 
     this.api.createLancamento(payload).subscribe({
-      next: () => {
-        this.lancamentosAdicionados.unshift(payload);
+      next: (lancamento) => {
+        this.lancamentosAdicionados.unshift(lancamento);
         if (this.lancamentosAdicionados.length > 5) {
           this.lancamentosAdicionados.pop();
         }
         this.form.reset({ nomeLancamento: '', valorLancamento: 0, selecao: 'RECEITA' });
+        this.aplicarValidacaoNome('RECEITA');
         this.saving = false;
       },
-      error: () => { this.saving = false; }
+      error: (err) => { this.saving = false; this.erroSalvar = err.error?.message ?? 'Erro ao salvar lançamento.'; }
     });
   }
 

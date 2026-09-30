@@ -46,13 +46,13 @@ namespace Financeiro.Api.Controllers
         [HttpPost]
         public ActionResult InsereLancamento([FromBody] LancamentoDTO lancamentoDTO)
         {
-            var erroValidacao = ValidarLancamento(lancamentoDTO);
+            var (erroValidacao, nomeResolvido) = ValidarEResolverLancamento(lancamentoDTO);
             if (erroValidacao is not null)
-                return BadRequest(erroValidacao);
+                return BadRequest(new { message = erroValidacao });
 
             var lancamento = new Lancamento
             {
-                NomeLancamento = lancamentoDTO.NomeLancamento,
+                NomeLancamento = nomeResolvido,
                 ValorLancamento = lancamentoDTO.ValorLancamento,
                 TipoLancamento = lancamentoDTO.TipoLancamento,
                 CategoriaId = lancamentoDTO.CategoriaId,
@@ -74,11 +74,11 @@ namespace Financeiro.Api.Controllers
             if (lancamento is null)
                 return NotFound();
 
-            var erroValidacao = ValidarLancamento(lancamentoDTO);
+            var (erroValidacao, nomeResolvido) = ValidarEResolverLancamento(lancamentoDTO);
             if (erroValidacao is not null)
-                return BadRequest(erroValidacao);
+                return BadRequest(new { message = erroValidacao });
 
-            lancamento.NomeLancamento = lancamentoDTO.NomeLancamento;
+            lancamento.NomeLancamento = nomeResolvido;
             lancamento.ValorLancamento = lancamentoDTO.ValorLancamento;
             lancamento.TipoLancamento = lancamentoDTO.TipoLancamento;
             lancamento.CategoriaId = lancamentoDTO.CategoriaId;
@@ -103,21 +103,82 @@ namespace Financeiro.Api.Controllers
             return NoContent();
         }
 
-        private string? ValidarLancamento(LancamentoDTO lancamentoDTO)
+        private (string? Erro, string Nome) ValidarEResolverLancamento(LancamentoDTO lancamentoDTO)
+        {
+            var erroTipo = ValidarTipoLancamento(lancamentoDTO);
+            if (erroTipo is not null)
+                return (erroTipo, string.Empty);
+
+            var erroValor = ValidarValorLancamento(lancamentoDTO);
+            if (erroValor is not null)
+                return (erroValor, string.Empty);
+
+            var (erroCategoria, categoria) = ValidarCategoriaLancamento(lancamentoDTO);
+            if (erroCategoria is not null)
+                return (erroCategoria, string.Empty);
+
+            if (lancamentoDTO.TipoLancamento == TipoLancamento.Receita)
+            {
+                var erroNome = ValidarNomeReceita(lancamentoDTO);
+                if (erroNome is not null)
+                    return (erroNome, string.Empty);
+
+                return (null, lancamentoDTO.NomeLancamento!.Trim());
+            }
+
+            return (null, ResolverNomeDespesa(lancamentoDTO.NomeLancamento, categoria!));
+        }
+
+        private static string? ValidarTipoLancamento(LancamentoDTO lancamentoDTO)
         {
             if (!Enum.IsDefined(typeof(TipoLancamento), lancamentoDTO.TipoLancamento))
                 return "TipoLancamento inválido.";
 
-            if (lancamentoDTO.TipoLancamento == TipoLancamento.Receita && lancamentoDTO.CategoriaId != null)
-                return "Receita não pode ter categoria.";
+            return null;
+        }
 
-            if (lancamentoDTO.TipoLancamento == TipoLancamento.Despesa && lancamentoDTO.CategoriaId == null)
-                return "Despesa exige uma categoria.";
-
-            if (lancamentoDTO.TipoLancamento == TipoLancamento.Despesa && !_context.Categorias.Any(c => c.Id == lancamentoDTO.CategoriaId))
-                return "Categoria informada não existe.";
+        private static string? ValidarValorLancamento(LancamentoDTO lancamentoDTO)
+        {
+            if (lancamentoDTO.ValorLancamento <= 0)
+                return "Valor deve ser maior que zero.";
 
             return null;
+        }
+
+        private (string? Erro, Categoria? Categoria) ValidarCategoriaLancamento(LancamentoDTO lancamentoDTO)
+        {
+            if (lancamentoDTO.TipoLancamento == TipoLancamento.Receita)
+            {
+                if (lancamentoDTO.CategoriaId != null)
+                    return ("Receita não pode ter categoria.", null);
+
+                return (null, null);
+            }
+
+            if (lancamentoDTO.CategoriaId == null)
+                return ("Despesa exige uma categoria.", null);
+
+            var categoria = _context.Categorias.FirstOrDefault(c => c.Id == lancamentoDTO.CategoriaId);
+            if (categoria is null)
+                return ("Categoria informada não existe.", null);
+
+            return (null, categoria);
+        }
+
+        private static string? ValidarNomeReceita(LancamentoDTO lancamentoDTO)
+        {
+            if (string.IsNullOrWhiteSpace(lancamentoDTO.NomeLancamento))
+                return "Nome do lançamento é obrigatório.";
+
+            return null;
+        }
+
+        private static string ResolverNomeDespesa(string? nomeInformado, Categoria categoria)
+        {
+            if (!string.IsNullOrWhiteSpace(nomeInformado))
+                return nomeInformado.Trim();
+
+            return categoria.Nome;
         }
 
         private LancamentoResponse CarregarResponse(int id)

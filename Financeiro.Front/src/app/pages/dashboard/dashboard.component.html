@@ -128,6 +128,7 @@
           <th>Nome</th>
           <th>Valor</th>
           <th>Tipo</th>
+          <th>Categoria</th>
           <th>Data</th>
         </tr>
       </thead>
@@ -141,6 +142,13 @@
             <span [class]="'badge ' + (l.tipoLancamento === 'Receita' ? 'badge-receita' : 'badge-despesa')">
               {{ l.tipoLancamento === 'Receita' ? 'Receita' : 'Despesa' }}
             </span>
+          </td>
+          <td>
+            <ng-container *ngIf="l.tipoLancamento === 'Despesa'; else semCategoria">
+              <span class="material-icons-outlined categoria-icone" [style.color]="l.categoriaCor">{{ l.categoriaIcone }}</span>
+              {{ l.categoriaNome }}
+            </ng-container>
+            <ng-template #semCategoria>—</ng-template>
           </td>
           <td>{{ l.dataLancamento | date:'dd/MM/yyyy' }}</td>
         </tr>

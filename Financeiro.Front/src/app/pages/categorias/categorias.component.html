@@ -64,14 +64,39 @@
       </div>
       <div class="form-section">
         <div class="input-group">
-          <label>Icone</label>
-          <input class="input" type="text" formControlName="icone" placeholder="Ex.: shopping_cart, local_taxi, restaurant" />
+          <label>Ícone</label>
+          <div class="icone-options">
+            <button
+              *ngFor="let opcao of icones"
+              type="button"
+              class="icone-option"
+              [class.active]="form.get('icone')?.value === opcao.valor"
+              (click)="form.patchValue({ icone: opcao.valor })"
+              [attr.aria-pressed]="form.get('icone')?.value === opcao.valor"
+              [attr.aria-label]="opcao.rotulo"
+              [attr.title]="opcao.rotulo">
+              <span class="material-icons-outlined">{{ opcao.valor }}</span>
+            </button>
+          </div>
         </div>
       </div>
       <div class="form-section">
         <div class="input-group">
           <label>Cor</label>
-          <input type="color" formControlName="cor" class="input" style="height:44px; padding:4px;" />
+          <div class="cor-options">
+            <button
+              *ngFor="let opcao of cores"
+              type="button"
+              class="cor-option"
+              [class.active]="form.get('cor')?.value === opcao.valor"
+              (click)="form.patchValue({ cor: opcao.valor })"
+              [attr.aria-label]="opcao.rotulo"
+              [attr.aria-pressed]="form.get('cor')?.value === opcao.valor"
+              [attr.title]="opcao.rotulo">
+              <span class="cor-swatch" [style.background]="opcao.valor"></span>
+              <span class="cor-label">{{ opcao.rotulo }}</span>
+            </button>
+          </div>
         </div>
       </div>
 

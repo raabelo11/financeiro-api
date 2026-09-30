@@ -11,7 +11,7 @@ export interface Lancamento {
 }
 
 export interface CriarLancamentoPayload {
-  nomeLancamento: string;
+  nomeLancamento: string | null;
   valorLancamento: number;
   tipoLancamento: 'Receita' | 'Despesa';
   categoriaId?: number | null;

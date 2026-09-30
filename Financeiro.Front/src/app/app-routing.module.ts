@@ -6,16 +6,17 @@ import { LancamentosListComponent } from './pages/lancamentos/lancamentos-list.c
 import { LancamentoFormComponent } from './pages/lancamentos/lancamento-form.component';
 import { CategoriasComponent } from './pages/categorias/categorias.component';
 import { VisaoGeralComponent } from './pages/visao-geral/visao-geral.component';
+import { authGuard, guestGuard } from './services/auth.guard';
 
 const routes: Routes = [
   { path: '', redirectTo: 'dashboard', pathMatch: 'full' },
-  { path: 'login', component: LoginComponent },
-  { path: 'dashboard', component: DashboardComponent },
-  { path: 'lancamentos', component: LancamentosListComponent },
-  { path: 'novo', component: LancamentoFormComponent },
-  { path: 'editar/:id', component: LancamentoFormComponent },
-  { path: 'categorias', component: CategoriasComponent },
-  { path: 'visao-geral', component: VisaoGeralComponent },
+  { path: 'login', component: LoginComponent, canActivate: [guestGuard] },
+  { path: 'dashboard', component: DashboardComponent, canActivate: [authGuard] },
+  { path: 'lancamentos', component: LancamentosListComponent, canActivate: [authGuard] },
+  { path: 'novo', component: LancamentoFormComponent, canActivate: [authGuard] },
+  { path: 'editar/:id', component: LancamentoFormComponent, canActivate: [authGuard] },
+  { path: 'categorias', component: CategoriasComponent, canActivate: [authGuard] },
+  { path: 'visao-geral', component: VisaoGeralComponent, canActivate: [authGuard] },
   { path: '**', redirectTo: 'dashboard' }
 ];
 

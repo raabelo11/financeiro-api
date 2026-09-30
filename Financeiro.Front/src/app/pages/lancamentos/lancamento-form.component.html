@@ -24,14 +24,14 @@
           class="input"
           [class.invalid]="form.get('nomeLancamento')?.invalid && form.get('nomeLancamento')?.touched"
           formControlName="nomeLancamento"
-          placeholder="Ex.: Salario, Aluguel, Mercado..." />
-        <div class="validation-error" *ngIf="form.get('nomeLancamento')?.invalid && form.get('nomeLancamento')?.touched">
+          [placeholder]="placeholderNomeLancamento" />
+        <div class="validation-error" *ngIf="isReceitaSelecionada && form.get('nomeLancamento')?.invalid && form.get('nomeLancamento')?.touched">
           Informe o nome do lancamento.
         </div>
       </div>
     </div>
 
-    <div class="form-row">
+    <div class="form-section">
       <div class="input-group">
         <label>Valor (R$)</label>
         <input
@@ -45,20 +45,45 @@
           Informe um valor valido.
         </div>
       </div>
+    </div>
 
+    <div class="form-section tipo-categoria-section">
       <div class="input-group">
         <label>Tipo / Categoria</label>
-        <div style="display:flex; gap:8px; align-items:flex-end;">
-          <select class="input" formControlName="selecao">
-            <option value="RECEITA">Receita</option>
-            <option *ngFor="let c of categorias" [value]="c.id">{{ c.nome }}</option>
-          </select>
-          <button type="button" class="btn btn-outline btn-sm" (click)="abrirNovoTipo()">
-            <span class="material-icons-outlined">add</span> Novo tipo
+        <div class="tipo-options">
+          <button
+            type="button"
+            class="tipo-option"
+            [class.active]="isSelecionado('RECEITA')"
+            [attr.aria-pressed]="isSelecionado('RECEITA')"
+            aria-label="Receita"
+            title="Receita"
+            [style.color]="'var(--success)'"
+            (click)="selecionar('RECEITA')">
+            <span class="material-icons-outlined">trending_up</span>
+            <span>Receita</span>
+          </button>
+          <button
+            type="button"
+            class="tipo-option"
+            *ngFor="let c of categorias"
+            [class.active]="isSelecionado(idCategoria(c))"
+            [attr.aria-pressed]="isSelecionado(idCategoria(c))"
+            [attr.aria-label]="c.nome"
+            [title]="c.nome"
+            [style.color]="c.cor"
+            (click)="selecionar(idCategoria(c))">
+            <span class="material-icons-outlined">{{ c.icone }}</span>
+            <span>{{ c.nome }}</span>
           </button>
         </div>
+        <button type="button" class="btn btn-outline btn-sm novo-tipo-btn" (click)="abrirNovoTipo()">
+          <span class="material-icons-outlined">add</span> Novo tipo
+        </button>
       </div>
     </div>
+
+    <div class="alert alert-danger" *ngIf="erroSalvar">{{ erroSalvar }}</div>
 
     <div class="form-actions">
       <button type="button" class="btn btn-outline" (click)="voltar()">Cancelar</button>

@@ -38,7 +38,7 @@ namespace Financeiro.Api.Controllers
         {
             var erroValidacao = ValidarCategoria(categoriaDTO, categoriaIdIgnorada: null);
             if (erroValidacao is not null)
-                return BadRequest(erroValidacao);
+                return BadRequest(new { message = erroValidacao });
 
             var categoria = new Categoria
             {
@@ -71,7 +71,7 @@ namespace Financeiro.Api.Controllers
 
             var erroValidacao = ValidarCategoria(categoriaDTO, categoriaIdIgnorada: id);
             if (erroValidacao is not null)
-                return BadRequest(erroValidacao);
+                return BadRequest(new { message = erroValidacao });
 
             categoria.Nome = categoriaDTO.Nome.Trim();
             categoria.Icone = categoriaDTO.Icone;

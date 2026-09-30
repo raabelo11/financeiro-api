@@ -160,6 +160,19 @@ export class VisaoGeralComponent implements OnInit {
     this.topCategoriaId = cards.length > 0 ? cards[0].categoriaId : null;
   }
 
+  get donutGradient(): string {
+    if (!this.cards.length) {
+      return 'conic-gradient(var(--border) 0% 100%)';
+    }
+    let acc = 0;
+    const stops = this.cards.map(c => {
+      const start = acc;
+      acc += c.percentual;
+      return `${c.cor} ${start}% ${acc}%`;
+    });
+    return `conic-gradient(${stops.join(', ')})`;
+  }
+
   private gerarUltimosAnos(anoAtual: number): number[] {
     const anos: number[] = [];
     for (let i = 0; i < 5; i++) {

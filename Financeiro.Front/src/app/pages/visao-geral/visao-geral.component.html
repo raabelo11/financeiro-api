@@ -77,6 +77,22 @@
     <div>Nenhuma despesa no período</div>
   </div>
 
+  <div class="card donut-card" *ngIf="!semDados">
+    <div class="donut-chart" [style.background]="donutGradient">
+      <div class="donut-chart-hole">
+        <div class="donut-chart-value">{{ totalDespesas | currency:'BRL' }}</div>
+        <div class="donut-chart-label">Total de despesas</div>
+      </div>
+    </div>
+    <div class="donut-legend">
+      <div class="donut-legend-item" *ngFor="let card of cards">
+        <span class="donut-legend-dot" [style.background]="card.cor"></span>
+        <span class="donut-legend-name">{{ card.nome }}</span>
+        <span class="donut-legend-percent">{{ card.percentual | number:'1.0-0' }}%</span>
+      </div>
+    </div>
+  </div>
+
   <div class="summary-cards categoria-cards" *ngIf="!semDados">
     <div class="summary-card categoria-card" [class.top]="card.categoriaId === topCategoriaId" *ngFor="let card of cards">
       <div class="summary-card-icon categoria-icon-chip" [style.color]="card.cor">

@@ -3,6 +3,16 @@ import { FormBuilder, Validators } from '@angular/forms';
 import { ApiService } from '../../services/api.service';
 import { Categoria, CategoriaPayload } from '../../models/categoria.model';
 
+interface IconeOption {
+  valor: string;
+  rotulo: string;
+}
+
+interface CorOption {
+  valor: string;
+  rotulo: string;
+}
+
 @Component({
   selector: 'app-categorias',
   standalone: false,
@@ -17,6 +27,36 @@ export class CategoriasComponent implements OnInit {
   editando: Categoria | null = null;
   salvando = false;
   erroForm: string | null = null;
+
+  readonly icones: IconeOption[] = [
+    { valor: 'category', rotulo: 'Geral' },
+    { valor: 'restaurant', rotulo: 'Alimentação' },
+    { valor: 'shopping_cart', rotulo: 'Mercado' },
+    { valor: 'directions_car', rotulo: 'Transporte' },
+    { valor: 'home', rotulo: 'Moradia' },
+    { valor: 'health_and_safety', rotulo: 'Saúde' },
+    { valor: 'school', rotulo: 'Educação' },
+    { valor: 'sports_esports', rotulo: 'Lazer' },
+    { valor: 'receipt_long', rotulo: 'Contas' },
+    { valor: 'work', rotulo: 'Trabalho' },
+    { valor: 'pets', rotulo: 'Pets' },
+    { valor: 'flight', rotulo: 'Viagem' }
+  ];
+
+  readonly cores: CorOption[] = [
+    { valor: '#4F46E5', rotulo: 'Índigo' },
+    { valor: '#2563EB', rotulo: 'Azul' },
+    { valor: '#0891B2', rotulo: 'Ciano' },
+    { valor: '#059669', rotulo: 'Verde' },
+    { valor: '#65A30D', rotulo: 'Lima' },
+    { valor: '#D97706', rotulo: 'Âmbar' },
+    { valor: '#EA580C', rotulo: 'Laranja' },
+    { valor: '#DC2626', rotulo: 'Vermelho' },
+    { valor: '#DB2777', rotulo: 'Rosa' },
+    { valor: '#9333EA', rotulo: 'Roxo' },
+    { valor: '#475569', rotulo: 'Ardósia' },
+    { valor: '#0F766E', rotulo: 'Turquesa' }
+  ];
 
   form = this.fb.group({
     nome: ['', Validators.required],
